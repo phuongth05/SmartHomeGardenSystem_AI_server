@@ -64,10 +64,9 @@ def predict_watering(data: SensorInput):
     time_diff = (current_time - last_water_time).total_seconds()
     if time_diff < COOLDOWN_SECONDS:
         return {
-            "decision": "SKIP",
+            "decision": "NO_WATER",
             "reason": f"Đang trong thời gian nghỉ (Cooldown). Còn {int(COOLDOWN_SECONDS - time_diff)}s nữa.",
             "water_duration": 0,
-            "data_received": data.dict()
         }
 
     # 4. Dự đoán: CÓ CẦN TƯỚI KHÔNG? (Classification)
@@ -79,7 +78,6 @@ def predict_watering(data: SensorInput):
             "decision": "NO_WATER",
             "reason": "Model dự đoán cây chưa cần nước.",
             "water_duration": 0,
-            "data_received": data.dict()
         }
     
     # 5. Dự đoán: TƯỚI BAO LÂU? (Regression)
@@ -96,7 +94,6 @@ def predict_watering(data: SensorInput):
             "decision": "NO_WATER",
             "reason": "Lượng nước dự đoán quá nhỏ, bỏ qua.",
             "water_duration": 0,
-            "raw_prediction": duration_pred
         }
 
     # 7. Cập nhật trạng thái và trả về kết quả
@@ -106,7 +103,6 @@ def predict_watering(data: SensorInput):
         "decision": "WATER",
         "reason": "Cây cần nước.",
         "water_duration": round(final_duration, 2), # Làm tròn 2 số thập phân
-        "raw_prediction": round(float(duration_pred), 2)
     }
 
 if __name__ == "__main__":
