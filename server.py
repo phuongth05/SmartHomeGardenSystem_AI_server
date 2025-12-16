@@ -8,14 +8,11 @@ import os
 
 # --- CẤU HÌNH AN TOÀN & RÀNG BUỘC ---
 MAX_WATER_DURATION = 7.0  # (Giây) Giới hạn tưới tối đa mỗi lần để tránh ngập
-COOLDOWN_SECONDS = 300     # (Giây) 5 phút - Không tưới lại nếu vừa mới tưới xong
 THRESHOLD_CONFIDENCE = 0.5 # Ngưỡng tự tin (nếu dùng predict_proba, ở đây dùng predict cứng)
 
 # --- KHỞI TẠO APP & LOAD MODEL ---
 app = FastAPI(title="Smart Garden API")
 
-# Biến toàn cục lưu thời gian lần tưới cuối cùng
-last_water_time = datetime.min
 
 # Kiểm tra và load model
 try:
@@ -59,17 +56,7 @@ def predict_watering(data: SensorInput):
         'minute': data.minute
     }])
     
-    # 3. Kiểm tra Ràng buộc thời gian (Cooldown)
-    # Nếu chưa đủ thời gian nghỉ từ lần tưới trước -> Hủy bỏ
-    time_diff = (current_time - last_water_time).total_seconds()
-    if time_diff < COOLDOWN_SECONDS:
-        return {
-            "decision": "NO_WATER",
-            "reason": f"Đang trong thời gian nghỉ (Cooldown). Còn {int(COOLDOWN_SECONDS - time_diff)}s nữa.",
-            "water_duration": 0,
-        }
-
-    # 4. Dự đoán: CÓ CẦN TƯỚI KHÔNG? (Classification)
+    # 3. Dự đoán: CÓ CẦN TƯỚI KHÔNG? (Classification)
     # Model trả về 1 (Tưới) hoặc 0 (Không)
     need_water_pred = classifier.predict(input_df)[0]
     
@@ -80,11 +67,11 @@ def predict_watering(data: SensorInput):
             "water_duration": 0,
         }
     
-    # 5. Dự đoán: TƯỚI BAO LÂU? (Regression)
+    # 4. Dự đoán: TƯỚI BAO LÂU? (Regression)
     # Chỉ chạy khi need_water == 1
     duration_pred = regressor.predict(input_df)[0]
     
-    # 6. Áp dụng Ràng buộc an toàn (Safety Logic)
+    # 5. Áp dụng Ràng buộc an toàn (Safety Logic)
     # Không bao giờ tưới quá MAX_WATER_DURATION và không tưới số âm
     final_duration = max(0.0, min(float(duration_pred), MAX_WATER_DURATION))
     
