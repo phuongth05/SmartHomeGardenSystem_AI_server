@@ -63,7 +63,7 @@ def predict_watering(data: SensorInput):
     if need_water_pred == 0:
         return {
             "decision": "NO_WATER",
-            "reason": "Model dự đoán cây chưa cần nước.",
+            "reason": "No watering needed.",
             "water_duration": 0,
         }
     
@@ -79,7 +79,7 @@ def predict_watering(data: SensorInput):
     if final_duration < 1.0:
          return {
             "decision": "NO_WATER",
-            "reason": "Lượng nước dự đoán quá nhỏ, bỏ qua.",
+            "reason": "The needed water amount is too small.",
             "water_duration": 0,
         }
 
@@ -88,7 +88,7 @@ def predict_watering(data: SensorInput):
     
     return {
         "decision": "WATER",
-        "reason": "Cây cần nước.",
+        "reason": "Watering required.",
         "water_duration": round(final_duration, 2), # Làm tròn 2 số thập phân
     }
 
