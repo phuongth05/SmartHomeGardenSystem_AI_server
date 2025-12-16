@@ -79,7 +79,7 @@ def predict_watering(data: SensorInput):
     if final_duration < 1.0:
          return {
             "decision": "NO_WATER",
-            "reason": "The needed water amount is too small.",
+            "reason": "No watering needed.",
             "water_duration": 0,
         }
 
